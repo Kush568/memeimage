@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>MemeGenius – Kontext Edition</title>
+<title>MemeGenius – Kontext</title>
 <style>
  body{font-family:system-ui,sans-serif;background:#f3f4f6;margin:0;padding:2rem;display:flex;flex-direction:column;align-items:center}
  h1{margin-bottom:1.3rem;color:#111827}
@@ -26,35 +26,37 @@
 </div>
 
 <script>
-const $ = id => document.getElementById(id);
-let fileObj;
+document.addEventListener("DOMContentLoaded",()=>{
+  const $ = id=>document.getElementById(id);
+  let fileObj;
 
-$("#file").addEventListener("change", e=>{
-  fileObj = e.target.files[0];
-  if(fileObj) $("#preview").src = URL.createObjectURL(fileObj);
-});
+  $("#file").addEventListener("change", e=>{
+    fileObj = e.target.files[0];
+    if(fileObj) $("#preview").src = URL.createObjectURL(fileObj);
+  });
 
-$("#gen").addEventListener("click", async ()=>{
-  if(!fileObj){ alert("Choose an image first"); return; }
-  $("#gen").disabled = true;
-  $("#status").textContent = "⏳ Generating…";
+  $("#gen").addEventListener("click", async ()=>{
+    if(!fileObj){ alert("Choose an image first"); return; }
+    $("#gen").disabled = true;
+    $("#status").textContent = "⏳ Generating…";
 
-  const fd = new FormData();
-  fd.append("image", fileObj);
-  fd.append("inspiration", $("#inspo").value);
+    const fd = new FormData();
+    fd.append("image", fileObj);
+    fd.append("inspiration", $("#inspo").value);
 
-  try{
-    const res = await fetch("/generate", {method:"POST", body:fd});
-    if(!res.ok) throw new Error(await res.text());
-    const blob = await res.blob();
-    $("#result").src = URL.createObjectURL(blob);
-    $("#status").textContent = "✅ Done! Right‑click to save.";
-  }catch(err){
-    console.error(err);
-    $("#status").textContent = "❌ "+err.message;
-  }finally{
-    $("#gen").disabled = false;
-  }
+    try{
+      const res = await fetch("/generate", {method:"POST", body:fd});
+      if(!res.ok) throw new Error(await res.text());
+      const blob = await res.blob();
+      $("#result").src = URL.createObjectURL(blob);
+      $("#status").textContent = "✅ Done! Right‑click to save.";
+    }catch(err){
+      console.error(err);
+      $("#status").textContent = "❌ "+err.message;
+    }finally{
+      $("#gen").disabled = false;
+    }
+  });
 });
 </script>
 </body>
