@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>MemeGenius – Kontext Edition</title>
+<style>
+ body{font-family:system-ui,sans-serif;background:#f3f4f6;margin:0;padding:2rem;display:flex;flex-direction:column;align-items:center}
+ h1{margin-bottom:1.3rem;color:#111827}
+ .card{background:#fff;padding:1.4rem;border-radius:1rem;box-shadow:0 6px 14px rgba(0,0,0,.08);width:clamp(320px,90vw,640px)}
+ img{width:100%;max-height:360px;object-fit:contain;margin-top:.75rem;border:1px dashed #d1d5db;border-radius:.5rem}
+ textarea{width:100%;min-height:90px;margin-top:1rem;padding:.75rem;border:1px solid #d1d5db;border-radius:.5rem;resize:vertical}
+ button{margin-top:1rem;padding:.75rem 1.25rem;font-weight:600;background:#4f46e5;color:#fff;border:none;border-radius:.5rem;cursor:pointer}
+ button[disabled]{opacity:.6;cursor:not-allowed}
+ #status{margin-top:.8rem;font-size:.88rem;color:#6b7280;min-height:1.2rem}
+</style>
+</head>
+<body>
+<h1>MemeGenius – Kontext Edition</h1>
+<div class="card">
+  <input id="file" type="file" accept="image/*">
+  <img id="preview" alt="Preview">
+  <textarea id="inspo" placeholder="Enter any inspiration (optional)"></textarea>
+  <button id="gen">Generate Meme</button>
+  <div id="status"></div>
+  <img id="result" alt="Meme">
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+let fileObj;
+
+$("#file").addEventListener("change", e=>{
+  fileObj = e.target.files[0];
+  if(fileObj) $("#preview").src = URL.createObjectURL(fileObj);
+});
+
+$("#gen").addEventListener("click", async ()=>{
+  if(!fileObj){ alert("Choose an image first"); return; }
+  $("#gen").disabled = true;
+  $("#status").textContent = "⏳ Generating…";
+
+  const fd = new FormData();
+  fd.append("image", fileObj);
+  fd.append("inspiration", $("#inspo").value);
+
+  try{
+    const res = await fetch("/generate", {method:"POST", body:fd});
+    if(!res.ok) throw new Error(await res.text());
+    const blob = await res.blob();
+    $("#result").src = URL.createObjectURL(blob);
+    $("#status").textContent = "✅ Done! Right‑click to save.";
+  }catch(err){
+    console.error(err);
+    $("#status").textContent = "❌ "+err.message;
+  }finally{
+    $("#gen").disabled = false;
+  }
+});
+</script>
+</body>
+</html>
